@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عرض تفاعلي GSAP</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .box { max-width: 720px; width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 36px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 24px; }
+    .item { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 18px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1 class="hero-el">واجهة تفاعلية بمكتبة GSAP</h1>
+    <p class="hero-el" style="color:#94a3b8">تحريك سلس وسريع للعناصر بدون أي تكلفة.</p>
+    <div class="grid">
+      <div class="item card-el">أداء فائق 60fps</div>
+      <div class="item card-el">انتقالات احترافية</div>
+      <div class="item card-el">متوافق مع الجوال</div>
+    </div>
+  </div>
+  <script>
+    gsap.from('.hero-el', { y: 24, opacity: 0, duration: 0.7, stagger: 0.15, ease: 'power3.out' });
+    gsap.from('.card-el', { scale: 0.92, opacity: 0, duration: 0.6, delay: 0.35, stagger: 0.12, ease: 'back.out(1.4)' });
+  </script>
+</body>
+</html>

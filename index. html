@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مواقيت الصلاة - سوهاج</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui;background:#0f172a;color:#fff;padding:16px;text-align:center}
+.card{background:#1e293b;border-radius:20px;padding:20px;margin:12px auto;max-width:480px}
+h1{font-size:22px;margin:0}h2{font-size:38px;margin:10px 0;color:#fbbf24}
+#count{font-size:18px;color:#a7f3d0}
+.row{display:flex;justify-content:space-between;padding:12px 14px;background:#0f172a;border-radius:12px;margin:8px 0}
+.row.active{background:#065f46;border:2px solid #34d399}
+button{background:#fbbf24;border:0;padding:12px 20px;border-radius:12px;font-weight:700;font-size:16px}
+select{padding:10px;border-radius:10px;width:100%;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🕌 مواقيت الصلاة</h1>
+<p id="city">سوهاج - مصر</p>
+<p id="date">...</p>
+<h2 id="clock">--:--:--</h2>
+<p id="count">جاري التحميل...</p>
+<select id="citySel" onchange="loadCity()">
+<option value="Sohag,EG">سوهاج</option>
+<option value="Cairo,EG">القاهرة</option>
+<option value="Alexandria,EG">الاسكندرية</option>
+<option value="Giza,EG">الجيزة</option>
+<option value="Aswan,EG">أسوان</option>
+<option value="Luxor,EG">الأقصر</option>
+</select>
+</div>
+<div class="card" id="times"></div>
+<div class="card"><button onclick="notify()">🔔 فعّل تنبيه الأذان</button><p style="font-size:13px;opacity:.7">اترك الصفحة مفتوحة وسيتم التنبيه عند الأذان</p></div>
+<script>
+let prayers={};
+async function loadCity(){
+let c=document.getElementById('citySel').value;
+let city=c.split(',')[0];
+document.getElementById('city').textContent=city+' - مصر';
+let r=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=Egypt&method=5`);
+let d=await r.json();
+let t=d.data.timings;
+document.getElementById('date').textContent=d.data.date.hijri.day+' '+d.data.date.hijri.month.ar+' '+d.data.date.hijri.year+' هـ | '+d.data.date.gregorian.date;
+prayers={Fajr:t.Fajr,Sunrise:t.Sunrise,Dhuhr:t.Dhuhr,Asr:t.Asr,Maghrib:t.Maghrib,Isha:t.Isha};
+let names={Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'};
+let html='';
+for(let k in prayers){html+=`<div class="row" id="r-${k}"><span>${names[k]}</span><b>${prayers[k].slice(0,5)}</b></div>`}
+document.getElementById('times').innerHTML=html;
+}
+function tick(){
+let n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('ar-EG');
+let next=null,nextName='';let names={Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'};
+for(let k in prayers){let [h,m]=prayers[k].slice(0,5).split(':');let d=new Date();d.setHours(h,m,0,0);if(d>n){next=d;nextName=k;break;}}
+if(!next){let [h,m]=prayers.Fajr.slice(0,5).split(':');next=new Date();next.setDate(next.getDate()+1);next.setHours(h,m,0,0);nextName='Fajr';}
+let diff=next-n;let hh=Math.floor(diff/3600000),mm=Math.floor(diff%3600000/60000),ss=Math.floor(diff%60000/1000);
+document.getElementById('count').textContent=`المتبقي على ${names[nextName]} : ${hh}:${mm}:${ss}`;
+document.querySelectorAll('.row').forEach(e=>e.classList.remove('active'));
+let el=document.getElementById('r-'+nextName);if(el)el.classList.add('active');
+if(diff<2000&&diff>0){new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3').play().catch(()=>{});if(Notification.permission==='granted')new Notification('حان الآن وقت '+names[nextName]);}
+}
+function notify(){Notification.requestPermission().then(p=>alert(p==='granted'?'تم تفعيل التنبيه ✅':'لم يتم التفعيل'))}
+loadCity();setInterval(tick,1000);
+</script>
+</body>
+</html>
